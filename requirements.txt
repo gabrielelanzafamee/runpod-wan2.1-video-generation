@@ -12,3 +12,5 @@ python-dotenv
 pillow
 numpy
 ftfy
+xformers
+triton
