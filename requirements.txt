@@ -11,3 +11,4 @@ uuid
 python-dotenv
 pillow
 numpy
+ftfy
