@@ -16,11 +16,13 @@ def init_model():
     
     try:
         # Check CUDA availability
-        if torch.cuda.is_available():
+        cuda_available = torch.cuda.is_available()
+        if cuda_available:
             print(f"✅ CUDA available: {torch.cuda.get_device_name()}")
             print(f"📊 GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
         else:
-            print("⚠️  CUDA not available, using CPU")
+            print("⚠️  CUDA not available during build - this is normal for Docker build process")
+            print("🔧 Model weights will be downloaded and cached for runtime use")
         
         # Model configuration
         model_id = "Wan-AI/Wan2.1-T2V-14B-Diffusers"
@@ -42,18 +44,24 @@ def init_model():
             vae=vae, 
             torch_dtype=torch.bfloat16
         )
+        print("✅ Pipeline loaded successfully")
         
-        if torch.cuda.is_available():
+        # Only move to CUDA if available (runtime, not build time)
+        if cuda_available:
             pipe.to("cuda")
             print("✅ Pipeline moved to CUDA")
+        else:
+            print("📋 Pipeline kept on CPU (will move to GPU at runtime)")
         
         load_time = time.time() - start_time
         print(f"🎉 Model initialization completed in {load_time:.2f} seconds")
         
-        # Optional: Run a quick test generation
-        if os.getenv("TEST_GENERATION", "false").lower() == "true":
+        # Optional: Run a quick test generation (only if CUDA available)
+        if os.getenv("TEST_GENERATION", "false").lower() == "true" and cuda_available:
             print("🧪 Running test generation...")
             test_generation(pipe)
+        elif os.getenv("TEST_GENERATION", "false").lower() == "true":
+            print("⏭️  Skipping test generation - no GPU available during build")
         
         return pipe, vae
         
