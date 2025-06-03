@@ -13,10 +13,10 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY init_model.py .
+# COPY init_model.py .
 
-# Pre-download and cache the model during build
-RUN python init_model.py
+# # Pre-download and cache the model during build
+# RUN python init_model.py
 
 # Copy application code
 COPY . .
