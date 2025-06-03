@@ -1,0 +1,37 @@
+{
+    "title": "Runpod Wan2.1 Video Generation",
+    "description": "A serverless video generation service powered by the Wan2.1 AI model, designed for RunPod deployment with Supabase storage integration. This project enables high-quality text-to-video generation with customizable parameters and cloud storage capabilities.",
+    "type": "serverless",
+    "category": "video",
+    "iconUrl": "https://i.imgur.com/1234567890.png",
+    "config": {
+      "runsOn": "GPU",
+      "containerDiskInGb": 84,
+      "presets": [
+        {
+          "name": "Wan2.1 Video Generation",
+          "defaults": {
+            "TEST_GENERATION": "false"
+          }
+        }
+      ],
+      "env": [
+        {
+          "key": "SUPABASE_URL",
+          "value": "static_value"
+        },
+        {
+          "key": "SUPABASE_KEY",
+          "value": "static_value"
+        },
+        {
+          "key": "BUCKET_ID",
+          "value": "static_value"
+        },
+        {
+          "key": "TEST_GENERATION",
+          "value": "false"
+        }
+      ]
+    }
+  }
