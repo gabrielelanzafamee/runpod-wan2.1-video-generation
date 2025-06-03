@@ -1,0 +1,13 @@
+diffusers
+accelerate
+peft
+transformers
+runpod
+supabase
+uvicorn
+fastapi
+pydantic
+uuid
+python-dotenv
+pillow
+numpy
