@@ -71,5 +71,4 @@ async def handler(job):
     
     return {"video_url": public_url}
 
-if __name__ == "__main__":
-    runpod.serverless.start({"handler": handler})
+runpod.serverless.start({"handler": handler})
