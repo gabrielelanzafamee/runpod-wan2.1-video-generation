@@ -30,21 +30,69 @@ def init_model():
         
         # Load VAE
         print("🔄 Loading VAE...")
-        vae = AutoencoderKLWan.from_pretrained(
-            model_id, 
-            subfolder="vae", 
-            torch_dtype=torch.float32
-        )
-        print("✅ VAE loaded successfully")
+        try:
+            # Try to load with fp16 variant first
+            vae = AutoencoderKLWan.from_pretrained(
+                model_id, 
+                subfolder="vae", 
+                torch_dtype=torch.bfloat16,
+                variant="fp16",
+                use_safetensors=True
+            )
+            print("✅ VAE loaded with fp16 variant")
+        except Exception as e:
+            print(f"⚠️ Failed to load VAE with fp16 variant: {e}")
+            print("🔄 Trying fallback: loading without variant...")
+            try:
+                vae = AutoencoderKLWan.from_pretrained(
+                    model_id, 
+                    subfolder="vae", 
+                    torch_dtype=torch.bfloat16,
+                    use_safetensors=True
+                )
+                print("✅ VAE loaded without variant")
+            except Exception as e2:
+                print(f"⚠️ Failed to load VAE with safetensors: {e2}")
+                print("🔄 Trying final fallback: loading with default settings...")
+                vae = AutoencoderKLWan.from_pretrained(
+                    model_id, 
+                    subfolder="vae", 
+                    torch_dtype=torch.bfloat16
+                )
+                print("✅ VAE loaded with default settings")
         
         # Load main pipeline
         print("🔄 Loading main pipeline...")
-        pipe = WanPipeline.from_pretrained(
-            model_id, 
-            vae=vae, 
-            torch_dtype=torch.bfloat16
-        )
-        print("✅ Pipeline loaded successfully")
+        try:
+            # Try to load with fp16 variant first
+            pipe = WanPipeline.from_pretrained(
+                model_id, 
+                vae=vae, 
+                torch_dtype=torch.bfloat16,
+                variant="fp16",
+                use_safetensors=True
+            )
+            print("✅ Pipeline loaded with fp16 variant")
+        except Exception as e:
+            print(f"⚠️ Failed to load pipeline with fp16 variant: {e}")
+            print("🔄 Trying fallback: loading without variant...")
+            try:
+                pipe = WanPipeline.from_pretrained(
+                    model_id, 
+                    vae=vae, 
+                    torch_dtype=torch.bfloat16,
+                    use_safetensors=True
+                )
+                print("✅ Pipeline loaded without variant")
+            except Exception as e2:
+                print(f"⚠️ Failed to load pipeline with safetensors: {e2}")
+                print("🔄 Trying final fallback: loading with default settings...")
+                pipe = WanPipeline.from_pretrained(
+                    model_id, 
+                    vae=vae, 
+                    torch_dtype=torch.bfloat16
+                )
+                print("✅ Pipeline loaded with default settings")
         
         # Only move to CUDA if available (runtime, not build time)
         if cuda_available:

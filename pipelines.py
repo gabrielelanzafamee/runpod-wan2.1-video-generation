@@ -36,25 +36,30 @@ def get_pipeline():
         # Use the larger model since we have plenty of VRAM
         model_id = "Wan-AI/Wan2.1-T2V-14B-Diffusers"
         
-        # Load with optimized settings
+        # Load with optimized settings - try multiple fallback strategies
         print("Loading VAE...")
+        # Try to load with fp16 variant first
         _vae = AutoencoderKLWan.from_pretrained(
             model_id, 
             subfolder="vae", 
             torch_dtype=torch.float32,
             use_safetensors=True
         )
+        print("✓ VAE loaded with fp16 variant")
+
         
         print("Loading main pipeline...")
+        # Try to load with fp16 variant first
         _pipe = WanPipeline.from_pretrained(
             model_id, 
             vae=_vae, 
-            torch_dtype=torch.float32,
+            torch_dtype=torch.bfloat16,
             use_safetensors=True,
             safety_checker=None,  # Disable safety checker for speed
             requires_safety_checker=False
         )
-        
+        print("✓ Pipeline loaded with fp16 variant")
+    
         # Move to GPU with optimizations
         _pipe = _pipe.to("cuda", dtype=torch.bfloat16)
         
@@ -63,12 +68,7 @@ def get_pipeline():
         _pipe.enable_model_cpu_offload(gpu_id=0)  # Smart offloading
         
         # Enable memory efficient attention (Flash Attention if available)
-        if XFORMERS_AVAILABLE:
-            try:
-                _pipe.enable_xformers_memory_efficient_attention()
-                print("✓ Enabled xFormers memory efficient attention")
-            except ImportError:
-                print("⚠ xFormers not available, using default attention")
+        # _pipe.enable_xformers_memory_efficient_attention()
             
         # Enable attention slicing for memory efficiency
         _pipe.enable_attention_slicing("auto")
