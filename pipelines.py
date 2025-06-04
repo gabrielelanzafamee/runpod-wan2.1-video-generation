@@ -1,7 +1,26 @@
 import torch
-from diffusers import AutoencoderKLWan, WanPipeline
-from diffusers.utils import export_to_video
 import os
+
+# Handle potential xformers/flash_attn compatibility issues
+try:
+    from diffusers import AutoencoderKLWan, WanPipeline
+    from diffusers.utils import export_to_video
+    XFORMERS_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Import error with xformers/flash_attn: {e}")
+    print("Attempting to import without xformers optimization...")
+    
+    # Disable xformers before importing diffusers
+    os.environ["XFORMERS_DISABLED"] = "1"
+    
+    try:
+        from diffusers import AutoencoderKLWan, WanPipeline
+        from diffusers.utils import export_to_video
+        XFORMERS_AVAILABLE = False
+        print("Successfully imported diffusers without xformers")
+    except ImportError as fallback_error:
+        print(f"Failed to import even without xformers: {fallback_error}")
+        raise
 
 # Global model instances - will be loaded once on first use
 _pipe = None
@@ -15,10 +34,10 @@ def get_pipeline():
         print("Loading model pipeline...")
         
         # Optimize CUDA settings for 80GB VRAM
-        torch.backends.cuda.matmul.allow_tf32 = True
-        torch.backends.cudnn.allow_tf32 = True
-        torch.backends.cudnn.benchmark = True
-        torch.backends.cudnn.deterministic = False
+        # torch.backends.cuda.matmul.allow_tf32 = True
+        # torch.backends.cudnn.allow_tf32 = True
+        # torch.backends.cudnn.benchmark = True
+        # torch.backends.cudnn.deterministic = False
         
         # Use the larger model since we have plenty of VRAM
         model_id = "Wan-AI/Wan2.1-T2V-14B-Diffusers"
@@ -52,11 +71,12 @@ def get_pipeline():
         _pipe.enable_model_cpu_offload(gpu_id=0)  # Smart offloading
         
         # Enable memory efficient attention (Flash Attention if available)
-        try:
-            _pipe.enable_xformers_memory_efficient_attention()
-            print("✓ Enabled xFormers memory efficient attention")
-        except ImportError:
-            print("⚠ xFormers not available, using default attention")
+        if XFORMERS_AVAILABLE:
+            try:
+                _pipe.enable_xformers_memory_efficient_attention()
+                print("✓ Enabled xFormers memory efficient attention")
+            except ImportError:
+                print("⚠ xFormers not available, using default attention")
             
         # Enable attention slicing for memory efficiency
         _pipe.enable_attention_slicing("auto")
@@ -80,22 +100,6 @@ def get_pipeline():
         except Exception as e:
             print(f"⚠ VAE decoder compilation failed: {e}")
         
-        # Pre-warm the pipeline with a dummy run to optimize CUDA kernels
-        print("Pre-warming pipeline...")
-        try:
-            with torch.no_grad():
-                _ = _pipe(
-                    prompt="test",
-                    height=256,
-                    width=256,
-                    num_frames=16,
-                    num_inference_steps=1,
-                    guidance_scale=1.0
-                )
-            print("✓ Pipeline pre-warming completed")
-        except Exception as e:
-            print(f"⚠ Pipeline pre-warming failed: {e}")
-
         print("Model pipeline loaded and optimized successfully!")
     
     return _pipe

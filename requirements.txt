@@ -1,4 +1,4 @@
-diffusers
+diffusers @ git+https://github.com/huggingface/diffusers.git@c934720629837257b15fd84d27e8eddaa52b76e6
 accelerate
 peft
 transformers
