@@ -31,8 +31,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Install Flash Attention compatible with PyTorch 2.4.0
 # Use specific version and force recompilation to ensure compatibility
-RUN pip uninstall -y flash-attn || true && \
-    pip install --no-cache-dir flash-attn==2.6.3 --force-reinstall --no-build-isolation
+RUN pip install xformers --index-url https://download.pytorch.org/whl/cu124
+RUN pip install flash-attn --no-build-isolation
 
 # Alternative: If flash-attn still fails, set environment variable to disable it
 ENV DISABLE_FLASH_ATTN=1

@@ -1,0 +1,9 @@
+{
+    "input": {
+      "prompt": "Hello World",
+      "negative_prompt": "blur, distorted, weird, ugly, low quality",
+      "seconds": 3,
+      "width": 853,
+      "height": 480
+    }
+  }

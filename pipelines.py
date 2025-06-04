@@ -41,8 +41,7 @@ def get_pipeline():
         _vae = AutoencoderKLWan.from_pretrained(
             model_id, 
             subfolder="vae", 
-            torch_dtype=torch.bfloat16,
-            variant="fp16",
+            torch_dtype=torch.float32,
             use_safetensors=True
         )
         
@@ -50,8 +49,7 @@ def get_pipeline():
         _pipe = WanPipeline.from_pretrained(
             model_id, 
             vae=_vae, 
-            torch_dtype=torch.bfloat16,
-            variant="fp16",
+            torch_dtype=torch.float32,
             use_safetensors=True,
             safety_checker=None,  # Disable safety checker for speed
             requires_safety_checker=False
