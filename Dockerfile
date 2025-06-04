@@ -25,14 +25,13 @@ ENV TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9;9.0"
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
 
+# Install Flash Attention for optimized attention (if compatible)
+RUN pip install --no-cache-dir --use-pep517 flash-attn --no-build-isolation || echo "Flash Attention installation failed, continuing..."
+
 # Install PyTorch and dependencies with CUDA optimization
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir torch==2.4.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 && \
     pip install --no-cache-dir -r requirements.txt
-
-# Install Flash Attention for optimized attention (if compatible)
-RUN pip install --no-cache-dir flash-attn --no-build-isolation || echo "Flash Attention installation failed, continuing..."
-
+    
 # COPY init_model.py .
 
 # # Pre-download and cache the model during build
