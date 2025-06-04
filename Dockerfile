@@ -29,13 +29,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Install Flash Attention compatible with PyTorch 2.4.0
-# Use specific version and force recompilation to ensure compatibility
-RUN pip install xformers --index-url https://download.pytorch.org/whl/cu124
-
-# Alternative: If flash-attn still fails, set environment variable to disable it
-ENV DISABLE_FLASH_ATTN=1
-
 # Copy application code
 COPY . .
 
