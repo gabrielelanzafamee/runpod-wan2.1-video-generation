@@ -1,4 +1,4 @@
-diffusers==0.34.0.dev0
+diffusers @ git+https://github.com/huggingface/diffusers.git@c934720629837257b15fd84d27e8eddaa52b76e6
 fastapi==0.115.12
 pydantic==2.11.5
 python-dotenv==1.1.0
