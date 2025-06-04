@@ -22,11 +22,11 @@ ENV CUDA_VISIBLE_DEVICES=0
 ENV PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512,expandable_segments:True
 ENV TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9;9.0"
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-
 # Install Flash Attention for optimized attention (if compatible)
 RUN pip install --no-cache-dir --use-pep517 flash-attn --no-build-isolation || echo "Flash Attention installation failed, continuing..."
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
 
 # Install PyTorch and dependencies with CUDA optimization
 RUN pip install --no-cache-dir --upgrade pip && \
