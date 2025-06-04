@@ -33,12 +33,6 @@ def get_pipeline():
     if _pipe is None:
         print("Loading model pipeline...")
         
-        # Optimize CUDA settings for 80GB VRAM
-        # torch.backends.cuda.matmul.allow_tf32 = True
-        # torch.backends.cudnn.allow_tf32 = True
-        # torch.backends.cudnn.benchmark = True
-        # torch.backends.cudnn.deterministic = False
-        
         # Use the larger model since we have plenty of VRAM
         model_id = "Wan-AI/Wan2.1-T2V-14B-Diffusers"
         

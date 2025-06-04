@@ -22,20 +22,20 @@ ENV CUDA_VISIBLE_DEVICES=0
 ENV PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512,expandable_segments:True
 ENV TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9;9.0"
 
-# Install Flash Attention for optimized attention (if compatible)
-RUN pip install --no-cache-dir --use-pep517 flash-attn --no-build-isolation || echo "Flash Attention installation failed, continuing..."
-
-# Copy requirements and install Python dependencies
+# Copy requirements and install Python dependencies first
 COPY requirements.txt .
 
 # Install PyTorch and dependencies with CUDA optimization
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
-    
-# COPY init_model.py .
 
-# # Pre-download and cache the model during build
-# RUN python init_model.py
+# Install Flash Attention compatible with PyTorch 2.4.0
+# Use specific version and force recompilation to ensure compatibility
+RUN pip uninstall -y flash-attn || true && \
+    pip install --no-cache-dir flash-attn==2.6.3 --force-reinstall --no-build-isolation
+
+# Alternative: If flash-attn still fails, set environment variable to disable it
+ENV DISABLE_FLASH_ATTN=1
 
 # Copy application code
 COPY . .
